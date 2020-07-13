@@ -10,7 +10,7 @@ An attempt to water my plants remotely using NodeMCU and Django.
 - Get more experience with network programming in C.
 - ...water my plants while I'm on vacation.
 
-### ESP-12E Module Stats:
+## ESP-12E Module Stats:
 - 32-bit RISC microprocessor
 - 80 to 160 Mhz clock
 - 64kB instruction RAM, 96kB data RAM
