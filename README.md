@@ -1,4 +1,4 @@
-# water-the-plants
+# water-my-plants
 An attempt to water my plants remotely using NodeMCU and Django.
 
 <br>
