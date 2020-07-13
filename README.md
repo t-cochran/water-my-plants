@@ -3,7 +3,7 @@ An attempt to water my plants remotely using NodeMCU and Django.
 
 <br>
 <img align="left" src="https://i.imgur.com/wbkhrl5.png" width="35%" height="35%">
-<img alien="left" src="http://clipart-library.com/images_k/plant-transparent-background/plant-transparent-background-7.png" width="21%" height="21%">
+<img align="left" src="http://clipart-library.com/images_k/plant-transparent-background/plant-transparent-background-7.png" width="21%" height="21%">
 
 **ESP-12E Module Stats:**
 - 32-bit RISC microprocessor
