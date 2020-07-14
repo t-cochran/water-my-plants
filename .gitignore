@@ -1,0 +1,9 @@
+.vscode
+build/
+sdkconfig
+sdkconfig.old
+ldgen_libraries
+*.o
+*.bin
+*.elf
+*.map
