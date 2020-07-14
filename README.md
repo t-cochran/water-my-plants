@@ -46,3 +46,13 @@ export IDF_PATH="$HOME/esp/ESP8266_RTOS_SDK"
 ```
 python -m pip install --user -r $IDF_PATH/requirements.txt
 ```
+## Build and Flash:
+- Plug in the ESP8266 and check its device file permissions
+- Set the serial port where the project will be loaded to:
+```
+make menuconfig
+```
+- Build and flash the application, then run it:
+```
+make flash monitor
+```
