@@ -14,7 +14,7 @@ An attempt to water my plants remotely using NodeMCU and Django.
 - IEEE 802.11 WiFi transceiver
 - Integrated TCP/IP stack
 
-<br>
+<br><br>
 
 ## Project Goals
 - Learn more about the django web framework and cloud deployment models.
