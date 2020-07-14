@@ -19,8 +19,8 @@ An attempt to water my plants remotely using NodeMCU and Django.
 - Get more experience with network programming in C.
 - ...water my plants while I'm on vacation.
 
-## Setting up the ESP8266 Software Development Toolkit (SDK):
-- Install some required packages on Arch Linux:
+## Setting up the ESP8266 SDK on Arch Linux:
+- Install some required packages:
 ```
 sudo pacman -S --needed gcc git make ncurses flex bison gperf python2-pyserial
 ```
