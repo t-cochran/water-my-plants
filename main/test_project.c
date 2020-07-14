@@ -70,7 +70,7 @@ static esp_err_t event_handler(void* ctx, system_event_t* event)
 {
     switch(event -> event_id)
     {
-        /* ESP8266 established a connection to the access point */
+        /* ESP8266 has started as a station */
         case SYSTEM_EVENT_STA_START:
             wifi_connect();
             ESP_LOGI(MAIN_TAG, "Connected to WiFi Access Point\n");
