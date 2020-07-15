@@ -103,7 +103,6 @@ void wifi_connect(void)
  */
 static esp_err_t event_handler(void* ctx, system_event_t* event)
 {
-    printf("EVENT_ID: %d\n", event -> event_id);
     switch(event -> event_id)
     {
         /* ESP8266 has started as a station */
@@ -115,12 +114,9 @@ static esp_err_t event_handler(void* ctx, system_event_t* event)
         /* ESP8266 is connected to an access point */
         case SYSTEM_EVENT_STA_CONNECTED:
             ESP_LOGI(TAG, "Connected to WiFi Access Point: \n");
-            printf("LEDblink %d\n", LEDblink);
-            printf("LEDsolid %d\n", LEDsolid);
             /* LED indicates a connection established */
             if (LEDblink)
             {
-                printf("Deinitializing LEDBlink\n");
                 hw_timer_deinit();
                 LEDblink = false;
             }
@@ -136,13 +132,10 @@ static esp_err_t event_handler(void* ctx, system_event_t* event)
             /* Get the IP address of the ESP8266 and print it */
             tcpip_adapter_ip_info_t ip_info;
 	        tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ip_info);
-            printf("Device IP Address: %s \n", ip4addr_ntoa(&ip_info.ip));
             break;
 
         /* ESP8266 is disconnected from the access point */
         case SYSTEM_EVENT_STA_DISCONNECTED:
-            printf("LEDblink %d\n", LEDblink);
-            printf("LEDsolid %d\n", LEDsolid);
             esp_wifi_connect();
             xEventGroupClearBits(wifi_event_group, 1);
             ESP_LOGI(TAG, "Disconnected  WiFi Access Point\n");
@@ -161,9 +154,6 @@ static esp_err_t event_handler(void* ctx, system_event_t* event)
             break;
 
         default:
-            printf("Default\n");
-            printf("LEDblink %d\n", LEDblink);
-            printf("LEDsolid %d\n", LEDsolid);
             break;
     }
     return ESP_OK;
