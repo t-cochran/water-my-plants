@@ -2,23 +2,58 @@
  *  test_project.c
  *  
  *  Connect the ESP8266 to a WiFi access point.
- * 
+ *  Display WiFi connection status using GPIO12 and GPIO15 pins.
  */
 #include <stdio.h>
-#include "esp_wifi.h"                  // wifi_config_t
-#include "freertos/FreeRTOS.h"         // BIT0
-#include "freertos/event_groups.h"     // EventGroupHandle_t
-#include "esp_log.h"                   // ESP_LOG_NONE
-#include "nvs_flash.h"                 // ESP_ERR_NVS_NO_FREE_PAGES
+#include "esp_wifi.h"               // wifi_config_t
+#include "driver/gpio.h"            // gpio_config_t
+#include "driver/hw_timer.h"        // hw_timer_init
+#include "freertos/event_groups.h"  // EventGroupHandle_t
+#include "esp_log.h"                // ESP_LOG_NONE
+#include "nvs_flash.h"              // ESP_ERR_NVS_NO_FREE_PAGES
 
-/* Constants */
-#define SSID NULL
-#define PASSPHRASE NULL
-#define MAIN_TAG "main"
-const int CONNECTED_BIT = 1;
+/* WiFi Access Point */
+#define SSID        "-"
+#define PASSPHRASE  "-"
 
-/* Global handle to an RTOS event group */
+/* Designate GPIO output pins */
+#define GPIO12_OUTPUT       12  // D6 on PCB
+#define GPIO15_OUTPUT       15  // D8 on PCB
+#define GPIO_PINS_SELECTED  ((1ULL << GPIO12_OUTPUT) | (1ULL << GPIO15_OUTPUT))
+
+/* Create a log tag and RTOS event group */
+static const char* TAG = "main";
 static EventGroupHandle_t wifi_event_group;
+
+/* Save the state of the hardware timer */
+bool LEDblink = false;
+bool LEDsolid = false;
+
+/* Alternate GPIO12 pin output */
+void GPIO12_blink(void *arg)
+{
+    static int state = 0;
+    gpio_set_level(GPIO15_OUTPUT, 0);
+    gpio_set_level(GPIO12_OUTPUT, (state++) % 2);
+}
+
+/* Turn on GPIO15 pin output */
+void GPIO15_solid(void *arg)
+{
+    gpio_set_level(GPIO12_OUTPUT, 0);
+    gpio_set_level(GPIO15_OUTPUT, 1);
+}
+
+/* Set GPIO pin settings for pins 12 and 15 */
+void gpio_config_init(gpio_config_t* cfg)
+{
+    ESP_LOGI(TAG, "Starting GPIO config...");
+    cfg -> intr_type = GPIO_INTR_DISABLE;
+    cfg -> mode = GPIO_MODE_OUTPUT;
+    cfg -> pin_bit_mask = GPIO_PINS_SELECTED;
+    cfg -> pull_down_en = 0;
+    cfg -> pull_up_en = 0;
+}
 
 /*
  *  Initialize the ESP8266 so it can create a WiFi connection.
@@ -40,7 +75,7 @@ static void init_wifi(void)
     esp_err_t ret = tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, "scarlett");
     if(ret != ESP_OK)
     {
-        ESP_LOGI(MAIN_TAG, "Error (%d) Hostname could not be set.", ret);  
+        ESP_LOGI(TAG, "Error (%d) Hostname could not be set.", ret);  
     }
 }
 
@@ -68,31 +103,67 @@ void wifi_connect(void)
  */
 static esp_err_t event_handler(void* ctx, system_event_t* event)
 {
+    printf("EVENT_ID: %d\n", event -> event_id);
     switch(event -> event_id)
     {
         /* ESP8266 has started as a station */
         case SYSTEM_EVENT_STA_START:
             wifi_connect();
-            ESP_LOGI(MAIN_TAG, "Connected to WiFi Access Point\n");
+            ESP_LOGI(TAG, "Attempting to connect to: %s\n", SSID);
             break;
-        
+
+        /* ESP8266 is connected to an access point */
+        case SYSTEM_EVENT_STA_CONNECTED:
+            ESP_LOGI(TAG, "Connected to WiFi Access Point: \n");
+            printf("LEDblink %d\n", LEDblink);
+            printf("LEDsolid %d\n", LEDsolid);
+            /* LED indicates a connection established */
+            if (LEDblink)
+            {
+                printf("Deinitializing LEDBlink\n");
+                hw_timer_deinit();
+                LEDblink = false;
+            }
+            hw_timer_init(GPIO15_solid, NULL);
+            hw_timer_alarm_us(1000, true);
+            LEDsolid = true;
+            break;
+
         /* ESP8266 got an IP address from the access point */
         case SYSTEM_EVENT_STA_GOT_IP:
-            xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);   
+            xEventGroupSetBits(wifi_event_group, 1);   
 
             /* Get the IP address of the ESP8266 and print it */
             tcpip_adapter_ip_info_t ip_info;
 	        tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ip_info);
-            print("Device IP Address: %s \n", ip4addr_ntoa(&ip_info.ip));
+            printf("Device IP Address: %s \n", ip4addr_ntoa(&ip_info.ip));
             break;
 
         /* ESP8266 is disconnected from the access point */
         case SYSTEM_EVENT_STA_DISCONNECTED:
+            printf("LEDblink %d\n", LEDblink);
+            printf("LEDsolid %d\n", LEDsolid);
             esp_wifi_connect();
-            xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
-            ESP_LOGI(MAIN_TAG, "Disconnected  WiFi Access Point\n");
+            xEventGroupClearBits(wifi_event_group, 1);
+            ESP_LOGI(TAG, "Disconnected  WiFi Access Point\n");
+
+            /* LED indicates the connection was lost */
+            if (LEDsolid || LEDblink)
+            {
+                hw_timer_disarm();
+                hw_timer_deinit();
+                LEDsolid = false;
+            }
+            hw_timer_init(GPIO12_blink, NULL);
+            hw_timer_alarm_us(100000, true);
+            vTaskDelay(3000 / portTICK_RATE_MS);  
+            LEDblink = true;
             break;
+
         default:
+            printf("Default\n");
+            printf("LEDblink %d\n", LEDblink);
+            printf("LEDsolid %d\n", LEDsolid);
             break;
     }
     return ESP_OK;
@@ -103,6 +174,11 @@ static esp_err_t event_handler(void* ctx, system_event_t* event)
  */
 void app_main(void)
 {
+    /* Configure GPIO pins */
+    gpio_config_t io_conf;
+    gpio_config_init(&io_conf);
+    gpio_config(&io_conf);
+
     /* Init an event loop to respond to events */
     esp_event_loop_init(event_handler, NULL);
 
