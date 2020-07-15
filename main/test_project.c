@@ -12,20 +12,21 @@
 #include "esp_log.h"                // ESP_LOG_NONE
 #include "nvs_flash.h"              // ESP_ERR_NVS_NO_FREE_PAGES
 
-/* WiFi Access Point */
-#define SSID        "-"
-#define PASSPHRASE  "-"
+/* WiFi Access Point configuration */
+#define SSID        CONFIG_ESP_WIFI_SSID
+#define PASSPHRASE  CONFIG_ESP_WIFI_PASSWORD
+#define MAX_RETRY   CONFIG_ESP_MAXIMUM_RETRY
 
-/* Designate GPIO output pins */
+/* Select GPIO output pins */
 #define GPIO12_OUTPUT       12  // D6 on PCB
 #define GPIO15_OUTPUT       15  // D8 on PCB
 #define GPIO_PINS_SELECTED  ((1ULL << GPIO12_OUTPUT) | (1ULL << GPIO15_OUTPUT))
 
-/* Create a log tag and RTOS event group */
-static const char* TAG = "main";
+/* Create a RTOS event group to signal WiFi events */
 static EventGroupHandle_t wifi_event_group;
 
-/* Save the state of the hardware timer */
+/* Create a log tag and save hardware timer states */
+static const char* TAG = "main";
 bool LEDblink = false;
 bool LEDsolid = false;
 
@@ -48,17 +49,17 @@ void GPIO15_solid(void *arg)
 void gpio_config_init(gpio_config_t* cfg)
 {
     ESP_LOGI(TAG, "Starting GPIO config...");
-    cfg -> intr_type = GPIO_INTR_DISABLE;
-    cfg -> mode = GPIO_MODE_OUTPUT;
-    cfg -> pin_bit_mask = GPIO_PINS_SELECTED;
-    cfg -> pull_down_en = 0;
-    cfg -> pull_up_en = 0;
+    cfg -> intr_type = GPIO_INTR_DISABLE;       // disable interrupt
+    cfg -> mode = GPIO_MODE_OUTPUT;             // output mode
+    cfg -> pin_bit_mask = GPIO_PINS_SELECTED;   // bit mask of selected pins
+    cfg -> pull_down_en = 0;                    // disable pull down
+    cfg -> pull_up_en = 0;                      // disable pull up
 }
 
 /*
  *  Initialize the ESP8266 so it can create a WiFi connection.
  */
-static void init_wifi(void)
+static void init_wifi_sta(void)
 {
     /* Initialize the TCIP/IP stack */
     tcpip_adapter_init();
@@ -101,7 +102,7 @@ void wifi_connect(void)
 /*
  *  An event handler that responds to changes in WiFi state.
  */
-static esp_err_t event_handler(void* ctx, system_event_t* event)
+static esp_err_t wifi_event_handler(void* ctx, system_event_t* event)
 {
     switch(event -> event_id)
     {
@@ -170,18 +171,18 @@ void app_main(void)
     gpio_config_init(&io_conf);
     gpio_config(&io_conf);
 
-    /* Init an event loop to respond to events */
-    esp_event_loop_init(event_handler, NULL);
+    /* Init an event loop to handle wifi events */
+    esp_event_loop_init(wifi_event_handler, NULL);
 
     /* Create an event group to track events */
     wifi_event_group = xEventGroupCreate();
 
     /* Init the nv flash memory partition on the ESP8266 */
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
+    esp_err_t ret;
+    if ((ret = nvs_flash_init()) == ESP_ERR_NVS_NO_FREE_PAGES) {
         nvs_flash_erase();
         ret = nvs_flash_init();
     }
     /* Init the ESP8266 to make a connection with an access point */
-    init_wifi();
+    init_wifi_sta();
 }

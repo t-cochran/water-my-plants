@@ -3,6 +3,7 @@ build/
 sdkconfig
 sdkconfig.old
 ldgen_libraries
+Kconfig.projbuild
 *.o
 *.bin
 *.elf
