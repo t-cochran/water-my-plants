@@ -114,7 +114,8 @@ static esp_err_t event_handler(void* ctx, system_event_t* event)
         /* ESP8266 is connected to an access point */
         case SYSTEM_EVENT_STA_CONNECTED:
             ESP_LOGI(TAG, "Connected to WiFi Access Point: \n");
-            /* LED indicates a connection established */
+
+            /* LED indicates a connection was established */
             if (LEDblink)
             {
                 hw_timer_deinit();
@@ -131,7 +132,7 @@ static esp_err_t event_handler(void* ctx, system_event_t* event)
 
             /* Get the IP address of the ESP8266 and print it */
             tcpip_adapter_ip_info_t ip_info;
-	        tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ip_info);
+            tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ip_info);
             break;
 
         /* ESP8266 is disconnected from the access point */
