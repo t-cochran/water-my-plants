@@ -18,6 +18,7 @@ An attempt to water my plants remotely using NodeMCU and Django.
 
 ## Project Goals
 - Learn more about the django web framework and cloud deployment models.
+- Work with the RTOS kernel to refresh some topics covered in operating systems.
 - Get more experience with network programming in C.
 - ...water my plants while I'm on vacation.
 
