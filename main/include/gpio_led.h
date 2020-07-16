@@ -1,9 +1,7 @@
 #ifndef __GPIO_LED_H__
 #define __GPIO_LED_H__
 
-#include <stdbool.h>
 #include "driver/gpio.h"  // gpio_config_t
-#include "esp_log.h"      // ESP_LOGI
 
 /* Select GPIO output pins */
 #define GPIO12_OUTPUT       12  // D6 on PCB
