@@ -16,9 +16,8 @@ void GPIO15_solid(void *arg)
 }
 
 /* Set GPIO pin settings for pins 12 and 15 */
-void gpio_config_init(gpio_config_t* cfg)
+extern void gpio_config_init(gpio_config_t* cfg)
 {
-    ESP_LOGI(TAG, "Starting GPIO config...");
     cfg -> intr_type = GPIO_INTR_DISABLE;       // disable interrupt
     cfg -> mode = GPIO_MODE_OUTPUT;             // output mode
     cfg -> pin_bit_mask = GPIO_PINS_SELECTED;   // bit mask of selected pins
