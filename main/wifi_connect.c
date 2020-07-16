@@ -1,17 +1,19 @@
 #include "gpio_led.h"
 #include "wifi_connect.h"
 
-const char* TAG = "WiFi";
-int retry_count = 0;
-bool LEDblink = false; 
+/* Track LED state during WiFi connect/disconnect */
+bool LEDblink = false;
 bool LEDsolid = false;
 
 /*
  *  An event handler that responds to changes in WiFi state.
  */ 
-extern void wifi_event_handler(void* arg, esp_event_base_t event, 
-                               int32_t event_id, void* event_data)
+void wifi_event_handler(void* arg, esp_event_base_t event, 
+                        int32_t event_id, void* event_data)
 {
+    retry_count = 0;            // Current number of re-connect attempts
+    const char* TAG = "WiFi";   // Log tag for the Wifi handler
+
     /* ESP8266 has started connecting */
     if (event == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
@@ -80,7 +82,7 @@ extern void wifi_event_handler(void* arg, esp_event_base_t event,
 /*
  *  Initialize the ESP8266 so it can create a WiFi connection.
  */
-extern void init_wifi(void)
+void init_wifi(void)
 {
     /* Initialize the TCIP/IP stack */
     tcpip_adapter_init();

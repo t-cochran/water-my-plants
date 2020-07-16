@@ -13,13 +13,16 @@
 #define PASSPHRASE  CONFIG_ESP_WIFI_PASSWORD
 #define MAX_RETRY   CONFIG_ESP_MAXIMUM_RETRY
 
+/* Globals */
+int retry_count;
+
 /* Create WiFi event group, event bits, retry count */
 EventGroupHandle_t wifi_event_group;
 #define WIFI_CONNECT        BIT0
 #define WIFI_DISCONNECT     BIT1
 
-extern void wifi_event_handler(void* arg, esp_event_base_t event, 
-                               int32_t event_id, void* event_data);
-extern void init_wifi(void);
+void wifi_event_handler(void* arg, esp_event_base_t event, 
+                        int32_t event_id, void* event_data);
+void init_wifi(void);
 
 #endif // __WIFI_CONNECT_H__
