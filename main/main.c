@@ -7,63 +7,17 @@
 #include <stdio.h>
 #include <string.h>
 #include "esp_wifi.h"               // wifi_config_t
-#include "driver/gpio.h"            // gpio_config_t
 #include "driver/hw_timer.h"        // hw_timer_init
-#include "freertos/event_groups.h"  // EventGroupHandle_t
-#include "esp_log.h"                // ESP_LOG_NONE
 #include "nvs_flash.h"              // ESP_ERR_NVS_NO_FREE_PAGES
+#include "gpio_led.h"
+#include "wifi_connect.h"
 
-/* WiFi Access Point configuration */
-#define SSID        CONFIG_ESP_WIFI_SSID
-#define PASSPHRASE  CONFIG_ESP_WIFI_PASSWORD
-#define MAX_RETRY   CONFIG_ESP_MAXIMUM_RETRY
-
-/* Select GPIO output pins */
-#define GPIO12_OUTPUT       12  // D6 on PCB
-#define GPIO15_OUTPUT       15  // D8 on PCB
-#define GPIO_PINS_SELECTED  ((1ULL << GPIO12_OUTPUT) | (1ULL << GPIO15_OUTPUT))
-
-/* Create WiFi event group, event bits, retry count */
-static EventGroupHandle_t wifi_event_group;
-static int retry_count = 0;
-#define WIFI_CONNECT        BIT0
-#define WIFI_DISCONNECT     BIT1
-
-/* Create a log tag and save hardware timer states */
-static const char* TAG = "main";
-bool LEDblink = false;
+bool LEDblink = false; 
 bool LEDsolid = false;
-
-
-/* Alternate GPIO12 pin output */
-void GPIO12_blink(void *arg)
-{
-    static int state = 0;
-    gpio_set_level(GPIO15_OUTPUT, 0);
-    gpio_set_level(GPIO12_OUTPUT, (state++) % 2);
-}
-
-/* Turn on GPIO15 pin output */
-void GPIO15_solid(void *arg)
-{
-    gpio_set_level(GPIO12_OUTPUT, 0);
-    gpio_set_level(GPIO15_OUTPUT, 1);
-}
-
-/* Set GPIO pin settings for pins 12 and 15 */
-void gpio_config_init(gpio_config_t* cfg)
-{
-    ESP_LOGI(TAG, "Starting GPIO config...");
-    cfg -> intr_type = GPIO_INTR_DISABLE;       // disable interrupt
-    cfg -> mode = GPIO_MODE_OUTPUT;             // output mode
-    cfg -> pin_bit_mask = GPIO_PINS_SELECTED;   // bit mask of selected pins
-    cfg -> pull_down_en = 0;                    // disable pull down
-    cfg -> pull_up_en = 0;                      // disable pull up
-}
 
 /*
  *  An event handler that responds to changes in WiFi state.
- */
+ */ 
 static void wifi_event_handler(void* arg, esp_event_base_t event, 
                                int32_t event_id, void* event_data)
 {
