@@ -82,8 +82,12 @@ void wifi_event_handler(void* arg, esp_event_base_t event,
 /*
  *  Initialize the ESP8266 so it can create a WiFi connection.
  */
-void init_wifi(void)
+void init_wifi(void* pvParameter)
 {
+    /* Configure GPIO pins for LEDs indicating WiFi connection */
+    gpio_config_t gpio_cfg;
+    gpio_config_init(&gpio_cfg);
+
     /* Initialize the TCIP/IP stack */
     tcpip_adapter_init();
 

@@ -23,6 +23,6 @@ EventGroupHandle_t wifi_event_group;
 
 void wifi_event_handler(void* arg, esp_event_base_t event, 
                         int32_t event_id, void* event_data);
-void init_wifi(void);
+void init_wifi(void* pvParameter);
 
 #endif // __WIFI_CONNECT_H__

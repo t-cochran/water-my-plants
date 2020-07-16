@@ -1,17 +1,23 @@
 /* 
  *  Main Task
  *  
- *  Connect the ESP8266 to a WiFi access point.
- *  Display WiFi connection status using GPIO12 and GPIO15 pins.
+ *  Fork two RTOS tasks:
+ *      (1) Connect the ESP8266 to a WiFi access point.
+ *          Display WiFi connection status using GPIO12 and GPIO15 pins.
+ * 
+ *      (2) Read analog input from a moisture sensor and display the data in the log.
  */
-#include "nvs_flash.h"              // ESP_ERR_NVS_NO_FREE_PAGES
+#include "nvs_flash.h"
 #include "gpio_led.h"
 #include "wifi_connect.h"
 #include "moisture_sensor.h"
 
-/* 
- *  Main function
- */
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#define INCLUDE_vTaskDelete 1
+
+
 void app_main(void)
 {
     /* Init the nv flash memory partition on the ESP8266 */
@@ -21,13 +27,11 @@ void app_main(void)
         ret = nvs_flash_init();
     }
 
-    /* Configure GPIO pins for LEDs */
-    gpio_config_t io_conf;
-    gpio_config_init(&io_conf);
-    gpio_config(&io_conf);
+    /* Task: Create WiFi connection */
+    TaskHandle_t xWifi;
+    xTaskCreate(&init_wifi, "wifi", 2048, NULL, 5, &xWifi);
 
-
-    /* Init WiFi connection */
-    init_wifi();
-    moisture_sensor_read();
+    /* Task: Read the moisture sensor */
+    TaskHandle_t xMoisture;
+    xTaskCreate(&moisture_sensor, "moisture", 2048, NULL, 5, &xMoisture);
 }

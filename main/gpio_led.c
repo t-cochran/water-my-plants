@@ -23,4 +23,5 @@ extern void gpio_config_init(gpio_config_t* cfg)
     cfg -> pin_bit_mask = GPIO_PINS_SELECTED;   // bit mask of selected pins
     cfg -> pull_down_en = 0;                    // disable pull down
     cfg -> pull_up_en = 0;                      // disable pull up
+    gpio_config(cfg);
 }
