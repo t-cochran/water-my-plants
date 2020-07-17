@@ -6,6 +6,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/portmacro.h"
 
+uint16_t data = 0;
+
 /*
  *  Read analog output from the moisture sensor on pin A0.
  */
@@ -17,22 +19,21 @@ void moisture_sensor(void* pvParameter)
     cfg.clk_div = 8;                // Read time: clock=80M/clk_div [8, 32]
     adc_init(&cfg);
 
-    /* Read the moisture sensor once every 1.5 seconds */
-    const TickType_t xDelay = 1500 / portTICK_PERIOD_MS;
+    /* Read the moisture sensor once every 2 seconds */
+    const TickType_t xDelay = 2000 / portTICK_PERIOD_MS;
 
     /* Take some readings */
-    unsigned short int pct = 0;
+    short int pct = 0;
     while(1)
     {   
         /* Read from the ADC */
-        uint16_t data = 0;
         adc_read(&data);
 
         /* Moisture percentage */
-        pct = (860 - data) % 100; 
+        pct = (850 - data) % 100; 
 
         /* Print the ADC value */
-        ESP_LOGI("[adc check]", "MOISTURE LEVEL: %hu %%", (unsigned short int)pct);
+        ESP_LOGI("[adc check]", "MOISTURE LEVEL: %hu %%", (short int)pct);
         vTaskDelay(xDelay);
     }
 }
