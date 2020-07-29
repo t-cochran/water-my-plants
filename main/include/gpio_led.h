@@ -2,6 +2,11 @@
 #define __GPIO_LED_H__
 
 #include "driver/gpio.h"  // gpio_config_t
+#include "driver/ledc.h"
+#include "freertos/FreeRTOS.h"
+#include "FreeRTOSConfig.h"
+#include "portmacro.h"
+#include "esp_err.h"
 
 /* Select GPIO output pins */
 #define GPIO12_OUTPUT       12  // D6 on PCB

@@ -1,5 +1,22 @@
 #include "gpio_led.h"
 #include "wifi_connect.h"
+#include "driver/ledc.h"
+
+ledc_timer_config_t ledc_timer = {
+    .duty_resolution = LEDC_TIMER_13_BIT,
+    .freq_hz = 500,
+    .speed_mode = LEDC_HIGH_SPEED_MODE,
+    .timer_num = LEDC_TIMER_0,
+};
+
+ledc_channel_config_t ledc_channel = {
+    .channel    = LEDC_CHANNEL_0,
+    .duty       = 0,
+    .gpio_num   = 15,
+    .speed_mode = LEDC_HIGH_SPEED_MODE,
+    .hpoint     = 0,
+    .timer_sel  = LEDC_TIMER_0
+};
 
 /* Track LED state during WiFi connect/disconnect */
 bool LEDblink = false;
@@ -25,15 +42,13 @@ void wifi_event_handler(void* arg, esp_event_base_t event,
     else if (event == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED)
     {
         /* LED indicates a connection was established */
-        ESP_LOGI(TAG, "Connected to SSID: %s \n", SSID);       
-        if (LEDblink)
-        {
-            hw_timer_deinit();
-            LEDblink = false;
-        }
-        hw_timer_init(GPIO15_solid, NULL);
-        hw_timer_alarm_us(1000, true);
-        LEDsolid = true;
+        ESP_LOGI(TAG, "Connected to SSID: %s \n", SSID);    
+
+        ledc_timer_config(&ledc_timer);
+        ledc_channel_config(&ledc_channel);
+        ledc_fade_func_install(0);
+        ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 500);
+        ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
     }
 
     /* ESP8266 given IP address */
