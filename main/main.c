@@ -22,24 +22,11 @@
 #include <stdio.h>
 
 void app_main(void)
-{
-    /* Initialize LED pins and channels */
-    const int led_gpio_pins[LED_COUNT] = { 12, 13 };
-    ledc_channel_config_t ledc_channel[LED_COUNT];
-    init_LEDS(ledc_channel, led_gpio_pins);
-
-    /* Declare LED types */
-    const ledc_channel_config_t GREEN_LED = ledc_channel[0];
-    const ledc_channel_config_t RED_LED = ledc_channel[1];
-
-    /* Toggle LEDs on/off */
-    toggle_LED(GREEN_LED, "on");
-    toggle_LED(RED_LED, "off");
-    
+{    
     /* Task: Create WiFi connection */
-/*     TaskHandle_t xWifi;
+    TaskHandle_t xWifi;
     xTaskCreate(&init_wifi, "wifi", 2048, NULL, 5, &xWifi);
- */
+
     // /* Task: Read the moisture sensor */
     // TaskHandle_t xMoisture;
     // xTaskCreate(&moisture_sensor, "moisture", 2048, NULL, 5, &xMoisture);

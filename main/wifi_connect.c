@@ -2,25 +2,11 @@
 #include "wifi_connect.h"
 #include "driver/ledc.h"
 
-ledc_timer_config_t ledc_timer = {
-    .duty_resolution = LEDC_TIMER_13_BIT,
-    .freq_hz = 500,
-    .speed_mode = LEDC_HIGH_SPEED_MODE,
-    .timer_num = LEDC_TIMER_0,
-};
-
-ledc_channel_config_t ledc_channel = {
-    .channel    = LEDC_CHANNEL_0,
-    .duty       = 0,
-    .gpio_num   = 15,
-    .speed_mode = LEDC_HIGH_SPEED_MODE,
-    .hpoint     = 0,
-    .timer_sel  = LEDC_TIMER_0
-};
-
-/* Track LED state during WiFi connect/disconnect */
-bool LEDblink = false;
-bool LEDsolid = false;
+/* Initialize LED pins and channels */
+const int led_gpio_pins[LED_COUNT] = { 12, 13 };
+ledc_channel_config_t ledc_channel[LED_COUNT];
+ledc_channel_config_t GREEN_LED;
+ledc_channel_config_t RED_LED;
 
 /*
  *  An event handler that responds to changes in WiFi state.
@@ -43,12 +29,8 @@ void wifi_event_handler(void* arg, esp_event_base_t event,
     {
         /* LED indicates a connection was established */
         ESP_LOGI(TAG, "Connected to SSID: %s \n", SSID);    
-
-        ledc_timer_config(&ledc_timer);
-        ledc_channel_config(&ledc_channel);
-        ledc_fade_func_install(0);
-        ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 500);
-        ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
+        toggle_LED(GREEN_LED, "on");
+        toggle_LED(RED_LED, "off");
     }
 
     /* ESP8266 given IP address */
@@ -69,16 +51,8 @@ void wifi_event_handler(void* arg, esp_event_base_t event,
     {
         /* LED indicates the connection was lost */
         ESP_LOGI(TAG, "Disconnected from SSID: %s\n", SSID);
-        if (LEDsolid || LEDblink)
-        {
-            hw_timer_disarm();
-            hw_timer_deinit();
-            LEDsolid = false;
-        }
-        hw_timer_init(GPIO12_blink, NULL);
-        hw_timer_alarm_us(100000, true);
-        vTaskDelay(3000 / portTICK_RATE_MS);  
-        LEDblink = true;
+        toggle_LED(GREEN_LED, "off");
+        toggle_LED(RED_LED, "on");
 
         /* Re-connect to the access point */
         if (retry_count < MAX_RETRY)
@@ -100,8 +74,9 @@ void wifi_event_handler(void* arg, esp_event_base_t event,
 void init_wifi(void* pvParameter)
 {
     /* Configure GPIO pins for LEDs indicating WiFi connection */
-    gpio_config_t gpio_cfg;
-    gpio_config_init(&gpio_cfg);
+    init_LEDS(ledc_channel, led_gpio_pins);
+    GREEN_LED = ledc_channel[0];
+    RED_LED = ledc_channel[1];
 
     /* Initialize the TCIP/IP stack */
     tcpip_adapter_init();
