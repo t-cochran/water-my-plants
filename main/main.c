@@ -23,20 +23,18 @@
 
 void app_main(void)
 {
-    /* Set LED gpio pins */
-    int led_gpio_pins[LED_COUNT] = { 12, 13 };
-
-    /* Initialize LEDs */
+    /* Initialize LED pins and channels */
+    const int led_gpio_pins[LED_COUNT] = { 12, 13 };
     ledc_channel_config_t ledc_channel[LED_COUNT];
     init_LEDS(ledc_channel, led_gpio_pins);
 
     /* Declare LED types */
-    const ledc_channel_config_t green = ledc_channel[0];
-    const ledc_channel_config_t red = ledc_channel[1];
+    const ledc_channel_config_t GREEN_LED = ledc_channel[0];
+    const ledc_channel_config_t RED_LED = ledc_channel[1];
 
     /* Toggle LEDs on/off */
-    toggle_LED(green, "on");
-    toggle_LED(red, "off");
+    toggle_LED(GREEN_LED, "on");
+    toggle_LED(RED_LED, "off");
     
     /* Task: Create WiFi connection */
 /*     TaskHandle_t xWifi;

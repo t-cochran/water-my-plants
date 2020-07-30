@@ -26,7 +26,7 @@ extern void gpio_config_init(gpio_config_t* cfg)
     gpio_config(cfg);
 }
 
-void init_LEDS(ledc_channel_config_t* ledc_channel, int pins[])
+void init_LEDS(ledc_channel_config_t* ledc_channel, const int pins[])
 {
     /* Configure LED controller timer */
     ledc_timer_config_t ledc_timer = {

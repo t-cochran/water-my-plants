@@ -20,7 +20,8 @@
 void GPIO12_blink(void *arg);
 void GPIO15_solid(void *arg);
 extern void gpio_config_init(gpio_config_t* cfg);
-void init_LEDS(ledc_channel_config_t* ledc_channel, int pins[]);
+
+void init_LEDS(ledc_channel_config_t* ledc_channel, const int pins[]);
 void toggle_LED(ledc_channel_config_t ledc_channel, char* setting);
 
 #endif  // __GPIO_LED_H__
