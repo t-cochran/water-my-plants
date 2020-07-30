@@ -7,6 +7,9 @@
 #include "FreeRTOSConfig.h"
 #include "portmacro.h"
 #include "esp_err.h"
+#include <string.h>
+
+#define LED_COUNT  2
 
 /* Select GPIO output pins */
 #define GPIO12_OUTPUT       12  // D6 on PCB
@@ -17,5 +20,7 @@
 void GPIO12_blink(void *arg);
 void GPIO15_solid(void *arg);
 extern void gpio_config_init(gpio_config_t* cfg);
+void init_LEDS(ledc_channel_config_t* ledc_channel, int pins[]);
+void toggle_LED(ledc_channel_config_t ledc_channel, char* setting);
 
 #endif  // __GPIO_LED_H__
