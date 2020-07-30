@@ -6,4 +6,5 @@
 # in the build directory. This behaviour is entirely configurable,
 # please read the ESP-IDF documents if you need to do this.
 #
+COMPONET_ADD_INCLUDEDIRS += $(PROJECT_PATH)/include
 COMPONENT_EXTRA_INCLUDES += $(PROJECT_PATH)/include

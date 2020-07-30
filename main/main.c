@@ -34,7 +34,13 @@ void app_main(void)
     TaskHandle_t xWifi;
     xTaskCreate(&init_wifi, "wifi", 2048, NULL, 5, &xWifi);
 
-    /* Task: Read the moisture sensor */
+    /* Task: Read the moisture sensor 
+     *
+     * TODO: Pass TaskHandle_t xWifi to xMoisture task
+     *       Turn off WiFi. 
+     *       Read moisture.
+     *       Turn WiFi back on.
+     * */
     TaskHandle_t xMoisture;
     xTaskCreate(&moisture_sensor, "moisture", 2048, NULL, 5, &xMoisture);
 
