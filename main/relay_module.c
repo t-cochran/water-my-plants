@@ -1,7 +1,9 @@
 #include "relay_module.h"
 #include <unistd.h>
 
-/* Turn current on in relay module for a given duration */
+/* 
+ *  Turn current on in relay module for a given duration
+ */
 void water_pump_on(unsigned int seconds)
 {
     /* Set GPIO pin settings for pin 4 */

@@ -1,12 +1,4 @@
-#include "driver/adc.h"
-#include "driver/gpio.h"
-#include "esp_log.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/portmacro.h"
-
-uint16_t data = 0;
+#include "moisture_sensor.h"
 
 /*
  *  Read analog output from the moisture sensor on pin A0.
@@ -14,6 +6,7 @@ uint16_t data = 0;
 void moisture_sensor(void* pvParameter)
 {
     /* Configure the ADC pin to be read */
+    moisture_data = 0;
     adc_config_t cfg;
     cfg.mode = ADC_READ_TOUT_MODE;  // Read the adc pin
     cfg.clk_div = 8;                // Read time: clock=80M/clk_div [8, 32]
@@ -27,10 +20,10 @@ void moisture_sensor(void* pvParameter)
     while(1)
     {   
         /* Read from the ADC */
-        adc_read(&data);
+        adc_read(&moisture_data);
 
         /* Moisture percentage */
-        pct = (850 - data) % 100; 
+        pct = (850 - moisture_data) % 100; 
 
         /* Print the ADC value */
         ESP_LOGI("[adc check]", "MOISTURE LEVEL: %hu %%", (short int)pct);

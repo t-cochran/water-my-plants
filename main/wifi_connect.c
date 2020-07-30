@@ -1,15 +1,17 @@
 #include "gpio_led.h"
 #include "wifi_connect.h"
-#include "driver/ledc.h"
+#include "esp_log.h"
 
-/* Initialize LED pins and channels */
+/*
+ *  Initialize LED pins and channels
+ */
 const int led_gpio_pins[LED_COUNT] = { 12, 13 };
 ledc_channel_config_t ledc_channel[LED_COUNT];
 ledc_channel_config_t GREEN_LED;
 ledc_channel_config_t RED_LED;
 
 /*
- *  An event handler that responds to changes in WiFi state.
+ *  Event handler that responds to changes in WiFi state
  */ 
 void wifi_event_handler(void* arg, esp_event_base_t event, 
                         int32_t event_id, void* event_data)
@@ -69,7 +71,7 @@ void wifi_event_handler(void* arg, esp_event_base_t event,
 }
 
 /*
- *  Initialize the ESP8266 so it can create a WiFi connection.
+ *  Initialize WiFi connection
  */
 void init_wifi(void* pvParameter)
 {

@@ -4,6 +4,7 @@ sdkconfig
 sdkconfig.old
 ldgen_libraries
 Kconfig.projbuild
+*.csv
 *.o
 *.bin
 *.elf
