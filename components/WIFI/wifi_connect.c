@@ -16,8 +16,9 @@ ledc_channel_config_t RED_LED;
 void wifi_event_handler(void* arg, esp_event_base_t event, 
                         int32_t event_id, void* event_data)
 {
-    retry_count = 0;            // Current number of re-connect attempts
     const char* TAG = "WiFi";   // Log tag for the Wifi handler
+
+    printf("EVENT TYPE TO BE HANDLED: %d\n", event_id);
 
     /* ESP8266 has started connecting */
     if (event == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
@@ -33,6 +34,7 @@ void wifi_event_handler(void* arg, esp_event_base_t event,
         ESP_LOGI(TAG, "Connected to SSID: %s \n", SSID);    
         toggle_LED(GREEN_LED, "on");
         toggle_LED(RED_LED, "off");
+            printf("-----------x-x---xx-x-x-x-x->>>>>>>>>>> 0\n");
     }
 
     /* ESP8266 given IP address */
@@ -43,9 +45,8 @@ void wifi_event_handler(void* arg, esp_event_base_t event,
         char* ip_str = ip4addr_ntoa(&event -> ip_info.ip);
         ESP_LOGI(TAG, "Device IP: %s\n", ip_str);
 
-        /* Set wifi event group bits and reset retry count */
+        /* Set wifi event group bits */
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECT);   
-        retry_count = 0;
     }
 
     /* ESP8266 disconnected */
@@ -55,18 +56,7 @@ void wifi_event_handler(void* arg, esp_event_base_t event,
         ESP_LOGI(TAG, "Disconnected from SSID: %s\n", SSID);
         toggle_LED(GREEN_LED, "off");
         toggle_LED(RED_LED, "on");
-
-        /* Re-connect to the access point */
-        if (retry_count < MAX_RETRY)
-        {
-            esp_wifi_connect();
-            ESP_LOGI(TAG, "Connecting...\n");
-            retry_count++;
-        }
-        else
-        {
-            xEventGroupSetBits(wifi_event_group, WIFI_DISCONNECT);
-        }
+            printf("-----------x-x---xx-x-x-x-x->>>>>>>>>>> 1\n");
     }
 }
 
@@ -111,19 +101,23 @@ void init_wifi(void* pvParameter)
     }
 
     /* Set the WiFi operating mode as a station and start it */
+        printf("-----------x-x---xx-x-x-x-x->>>>>>>>>>> 2\n");
     esp_wifi_set_mode(WIFI_MODE_STA);
     esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_cfg);
     esp_wifi_start();
-
-    /* Block until either a connection event or disconnect event */
+    printf("-----------x-x---xx-x-x-x-x->>>>>>>>>>> 3\n");
+    /* Block until a connection event or disconnect event */
     xEventGroupWaitBits(wifi_event_group,
            WIFI_CONNECT | WIFI_DISCONNECT,
            pdFALSE,
            pdFALSE,
            portMAX_DELAY);
 
+    printf("-----------x-x---xx-x-x-x-x->>>>>>>>>>> 4\n");
+
     /* Unregister the wifi event handler from the system event loop */
     esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_event_handler);
     esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler);
     vEventGroupDelete(wifi_event_group);
+        printf("-----------x-x---xx-x-x-x-x->>>>>>>>>>> 5\n");
 }

@@ -1,12 +1,10 @@
 #ifndef __RELAY_MODULE_H__
 #define __RELAY_MODULE_H__
 
-
 /*
  *  Libraries
  */
 #include "driver/gpio.h"
-
 
 /*
  *  Constants
@@ -16,11 +14,9 @@
 #define ON                   0
 #define OFF                  1
 
-
 /* 
  *  Function prototypes
  */
 void water_pump_on(unsigned int seconds);
-
 
 #endif // __RELAY_MODULE_H__

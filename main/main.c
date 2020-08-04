@@ -2,11 +2,10 @@
  *  Main Task
  *      (1) Turn the water pump on/off.
  *  
- *  Fork two RTOS tasks:
+ *  Fork two tasks:
  *      (1) Connect the ESP8266 to a WiFi access point.
- *          Display WiFi connection status using GPIO12 and GPIO1 pins.
  * 
- *      (2) Read analog input from a moisture sensor and display the data in the log.
+ *      (2) Read analog input from a moisture sensor.
  */
 
 /* Hardware modules */
@@ -15,11 +14,8 @@
 #include "moisture_sensor.h"
 #include "relay_module.h"
 
-/* Main headers */
-#include "nvs_flash.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include <stdio.h>
+/* Main headers and helper functions */
+#include "helpers.h"
 
 void app_main(void)
 {    
@@ -30,25 +26,32 @@ void app_main(void)
         ret = nvs_flash_init();
     }
 
-    /* Task: Create WiFi connection */
-    TaskHandle_t xWifi;
-    xTaskCreate(&init_wifi, "wifi", 2048, NULL, 5, &xWifi);
+    /* Task A: Initialize WiFi */
+    xTaskCreate(&init_wifi, "wifi", 2048, NULL, 5, &wifi);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    /* Task: Read the moisture sensor 
+    /* Task B: Read the moisture sensor */
+    get_moisture_level();
+    /*
      *
-     * TODO: Pass TaskHandle_t xWifi to xMoisture task
-     *       Turn off WiFi. 
-     *       Read moisture.
-     *       Turn WiFi back on.
-     * */
-    TaskHandle_t xMoisture;
-    xTaskCreate(&moisture_sensor, "moisture", 2048, NULL, 5, &xMoisture);
+     *   TODO: Return the average moisture level
+     */
+    printf("Sleeping for 5 seconds ...\n");
+    get_moisture_level();
 
-    /* Main Task: Turn the water pump on a few times */
-    water_pump_on(10);
-    sleep(5);
-    water_pump_on(10);
-    sleep(5);
-    water_pump_on(10);
-    sleep(5);
+    /* Task C: Turn on the water pump */
+    /*
+     *
+     *   TODO: Turn on the water pump if moisture level is below a threshold
+     */
+
+    // /* Main task: Turn the water pump on */
+    // water_pump_on(10);
+    // sleep(5);
+
+
+    // /* Check moisture sensor and wifi task status */
+    // task_status(xMoisture, "moisture_sensor");
+    // task_status(wifi, "wifi");
+    // sleep(5);
 }
