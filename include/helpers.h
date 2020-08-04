@@ -21,9 +21,8 @@
 /*
  *  Gloabls
  */
-BaseType_t xRet;
 TaskHandle_t wifi;
-TaskStatus_t task_info;
+QueueHandle_t xQueue;
 
 /*
  *  Function protoypes

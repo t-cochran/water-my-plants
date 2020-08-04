@@ -9,11 +9,15 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "freertos/FreeRTOS.h"
+#include "wifi_connect.h"
+#include "helpers.h"
 
 /*
  *  Globals
  */
 uint16_t moisture_data;
+BaseType_t xRet;
+TaskStatus_t task_info;
 TaskHandle_t xMoisture;
 
 /* 

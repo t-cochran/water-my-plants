@@ -19,12 +19,19 @@
 
 void app_main(void)
 {    
-    /* Init nv flash memory partition */
+
+    xQueue = NULL;
+    long xRecv = 0;
+
+    /* Main task: Initialize nv flash memory partition */
     esp_err_t ret;
     if ((ret = nvs_flash_init()) == ESP_ERR_NVS_NO_FREE_PAGES) {
         nvs_flash_erase();
         ret = nvs_flash_init();
     }
+
+    /* Main task: Initialize shared queue */
+    xQueue = xQueueCreate(10, sizeof(long));
 
     /* Task A: Initialize WiFi */
     xTaskCreate(&init_wifi, "wifi", 2048, NULL, 5, &wifi);
@@ -32,19 +39,33 @@ void app_main(void)
 
     /* Task B: Read the moisture sensor */
     get_moisture_level();
-    /*
-     *
-     *   TODO: Return the average moisture level
-     */
-    printf("Sleeping for 5 seconds ...\n");
+
+    /* Main task: Fetch the average moisture level from task B */
+    printf("Reading from the queue ... previous value: %ld\n", xRecv);
+    sleep(2);
+    xQueueReceive(xQueue, (void*)&xRecv, (TickType_t)5);
+    printf("The average moisture level is: %ld\n", xRecv);
+    sleep(2);
+    
+    /* Task B: Read the moisture sensor */
     get_moisture_level();
+
+    /* Main task: Fetch the average moisture level from task B */
+    printf("Reading from the queue ... previous value: %ld\n", xRecv);
+    sleep(2);
+    xQueueReceive(xQueue, (void*)&xRecv, (TickType_t)5);
+    printf("The average moisture level is: %ld\n", xRecv);
+    sleep(2);
+
+    /* Turn off Wifi */
+    printf("turning wifi off\n");
+    esp_wifi_disconnect();
 
     /* Task C: Turn on the water pump */
     /*
      *
      *   TODO: Turn on the water pump if moisture level is below a threshold
      */
-
     // /* Main task: Turn the water pump on */
     // water_pump_on(10);
     // sleep(5);
