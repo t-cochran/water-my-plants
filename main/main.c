@@ -15,7 +15,7 @@
 
 void app_main(void)
 {    
-    long xRecv = 0;
+    long moisture = 0;
     xQueue = NULL;
 
     /* Main task: Initialize nv flash memory partition */
@@ -32,42 +32,18 @@ void app_main(void)
     xTaskCreate(&init_wifi, "wifi", 2048, NULL, 5, &wifi);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-    /* Task B: Read the moisture sensor */
-    get_moisture_level();
-    xQueueReceive(xQueue, (void*)&xRecv, (TickType_t)5);
-    printf("The average moisture level is: %ld\n", xRecv);
-    sleep(2);
+    /* Main task: Pump water if moisture level is below 70% */
+    while(1)
+    {
+        /* Task B: Read the moisture sensor */
+        get_moisture_level();
+        xQueueReceive(xQueue, (void*)&moisture, (TickType_t)5);
 
-    /* Task B: Read the moisture sensor */
-    get_moisture_level();
-    xQueueReceive(xQueue, (void*)&xRecv, (TickType_t)5);
-    printf("The average moisture level is: %ld\n", xRecv);
-    sleep(2);
-
-    /* Turn off Wifi */
-    printf("turning wifi off\n");
-    esp_wifi_disconnect();
-
-    /* Task C: Turn on the water pump */
-    /*
-     *   TODO: Create function to:
-     *          -> Fork Task C
-     *          -> Turn on water pump for 10 seconds
-     *          -> Delete Task C
-     * 
-     *   TODO: If the moisture level is below a threshold, fork Task C
-     * 
-     *   TODO: Test -- Empty cup; while(1) read moisture level every 10 seconds
-     *                              if moisture level is below threshold
-     *                                  fork task C to turn on pump for 10 seconds
-     */
-    // /* Main task: Turn the water pump on */
-    // water_pump_on(10);
-    // sleep(5);
-
-
-    // /* Check moisture sensor and wifi task status */
-    // task_status(xMoisture, "moisture_sensor");
-    // task_status(wifi, "wifi");
-    // sleep(5);
+        /* Main task: Turn pump on for 10 seconds */
+        if (moisture < 70)
+        {
+            water_pump_on(10);
+        }
+        vTaskDelay(3000 / portTICK_PERIOD_MS);
+    }
 }
