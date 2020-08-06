@@ -4,11 +4,10 @@
 /*
  *  Libraries
  */
-#include <stdbool.h>
-#include <string.h>
-#include "esp_wifi.h"               // wifi_config_t
-#include "driver/hw_timer.h"        // hw_timer_init
-#include "freertos/event_groups.h"  // EventGroupHandle_t
+#include "esp_log.h"
+#include "gpio_led.h"
+#include "esp_wifi.h"
+#include "freertos/event_groups.h"
 
 /*
  *  Constants
@@ -22,6 +21,7 @@
  *  Globals
  */
 EventGroupHandle_t wifi_event_group;
+TaskHandle_t wifi;
 
 /* 
  *  Function prototypes

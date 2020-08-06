@@ -4,6 +4,7 @@
 /*
  *  Libraries
  */
+#include <unistd.h>
 #include "driver/gpio.h"
 
 /*

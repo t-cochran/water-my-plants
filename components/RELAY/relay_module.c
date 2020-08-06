@@ -1,5 +1,4 @@
 #include "relay_module.h"
-#include <unistd.h>
 
 /* 
  *  Turn current on in relay module for a given duration

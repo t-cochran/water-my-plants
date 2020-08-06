@@ -1,6 +1,5 @@
 #include "moisture_sensor.h"
 
-
 /*  
  *  Read the moisture sensor ADC pin
  * 
@@ -9,6 +8,8 @@
  */
 void get_moisture_level(void)
 {
+    BaseType_t xRet;
+
     /* Task: Fork a task to read the moisture sensor */    
     if ((xRet = xTaskCreate(&moisture_sensor, "moisture", 2048, NULL, 5, &xMoisture)) == pdPASS)
     {
@@ -25,16 +26,14 @@ void get_moisture_level(void)
     }
 }
 
-
 /*
  *  Read analog output from the moisture sensor and compute the average.
  */
 void moisture_sensor(void* pvParameter)
 {
-    long xMessage = 0;
     esp_err_t err;
-    moisture_data = 0;
-    long pct = 0, total = 0, num_readings = 0;
+    uint16_t moisture_data = 0;
+    long pct = 0, total = 0, num_readings = 0, xMessage = 0;
 
     /* Configure the ADC pin to be read */
     adc_config_t cfg;
@@ -64,7 +63,7 @@ void moisture_sensor(void* pvParameter)
     }
     ESP_LOGI("[Average Moisture Level]", " %ld %%", (long)total/num_readings);
 
-    /* Send avg moisture level to the shared queue */
+    /* Send avg moisture level to the shared buffer */
     xMessage = (long)total/num_readings;
     xQueueSend(xQueue, (void*)&xMessage, (TickType_t)5);
 
@@ -73,11 +72,10 @@ void moisture_sensor(void* pvParameter)
     vTaskDelete(xMoisture);
 }
 
-
 /*
  *  Map analog input to a range of values
  */
-long adc_map(long x, long in_min, long in_max, long out_min, long out_max)
+uint16_t adc_map(long x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max)
 {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

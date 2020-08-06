@@ -9,19 +9,14 @@
  */
 
 /* Hardware modules */
-#include "gpio_led.h"
-#include "wifi_connect.h"
 #include "moisture_sensor.h"
 #include "relay_module.h"
 
-/* Main headers and helper functions */
-#include "helpers.h"
 
 void app_main(void)
 {    
-
-    xQueue = NULL;
     long xRecv = 0;
+    xQueue = NULL;
 
     /* Main task: Initialize nv flash memory partition */
     esp_err_t ret;
@@ -30,7 +25,7 @@ void app_main(void)
         ret = nvs_flash_init();
     }
 
-    /* Main task: Initialize shared queue */
+    /* Main task: Initialize shared buffer */
     xQueue = xQueueCreate(10, sizeof(long));
 
     /* Task A: Initialize WiFi */
@@ -39,20 +34,12 @@ void app_main(void)
 
     /* Task B: Read the moisture sensor */
     get_moisture_level();
-
-    /* Main task: Fetch the average moisture level from task B */
-    printf("Reading from the queue ... previous value: %ld\n", xRecv);
-    sleep(2);
     xQueueReceive(xQueue, (void*)&xRecv, (TickType_t)5);
     printf("The average moisture level is: %ld\n", xRecv);
     sleep(2);
-    
+
     /* Task B: Read the moisture sensor */
     get_moisture_level();
-
-    /* Main task: Fetch the average moisture level from task B */
-    printf("Reading from the queue ... previous value: %ld\n", xRecv);
-    sleep(2);
     xQueueReceive(xQueue, (void*)&xRecv, (TickType_t)5);
     printf("The average moisture level is: %ld\n", xRecv);
     sleep(2);
@@ -63,8 +50,16 @@ void app_main(void)
 
     /* Task C: Turn on the water pump */
     /*
-     *
-     *   TODO: Turn on the water pump if moisture level is below a threshold
+     *   TODO: Create function to:
+     *          -> Fork Task C
+     *          -> Turn on water pump for 10 seconds
+     *          -> Delete Task C
+     * 
+     *   TODO: If the moisture level is below a threshold, fork Task C
+     * 
+     *   TODO: Test -- Empty cup; while(1) read moisture level every 10 seconds
+     *                              if moisture level is below threshold
+     *                                  fork task C to turn on pump for 10 seconds
      */
     // /* Main task: Turn the water pump on */
     // water_pump_on(10);

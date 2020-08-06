@@ -5,25 +5,21 @@
  *  Libraries
  */
 #include "driver/adc.h"
-#include "esp_log.h"
 #include "FreeRTOS.h"
-#include "task.h"
-#include "freertos/FreeRTOS.h"
 #include "wifi_connect.h"
 #include "helpers.h"
 
 /*
  *  Globals
  */
-uint16_t moisture_data;
-BaseType_t xRet;
-TaskStatus_t task_info;
 TaskHandle_t xMoisture;
+QueueHandle_t xQueue;
 
 /* 
  *  Function prototypes
  */
 void moisture_sensor(void* pvParameter);
-long adc_map(long x, long in_min, long in_max, long out_min, long out_max);
+uint16_t adc_map(long x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max);
+void get_moisture_level(void);
 
 #endif // __MOISTURE_SENSOR_H__
